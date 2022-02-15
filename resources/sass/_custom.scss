@@ -1,0 +1,58 @@
+body {
+    height: 100%;
+    background-color: #dbe6fd !important;
+}
+
+#log-reg-container {
+    margin-top: 10%;
+}
+
+#theNavBar {
+    background-color: #47597e !important;
+}
+
+.activeNavItem {
+    background-color: #192339;
+    border-radius: 10px;
+}
+
+.linkCard {
+    text-decoration: none;
+}
+
+.linkCard .card {
+    background-color: #bfc4cf;
+    color: black;
+    transition: 0.5s;
+}
+
+.linkCard .card:hover {
+    background-color: white;
+    border: 1px solid #293b5f;
+}
+
+.linkCard .card:active {
+    color: red;
+    border: 1px solid yellow;
+}
+
+.detailsBox {
+    background-color: white;
+    border: 1px solid #293b5f;
+    border-radius: 10px;
+}
+
+.customFieldset {
+    border: 1px solid #293b5f;
+    background-color: white;
+}
+
+.customFieldset legend {
+    float: none;
+    padding: inherit;
+}
+
+.card{
+    text-align: center;
+    min-width: 20rem;
+}
