@@ -143,6 +143,7 @@ class ExchangesController extends Controller
      */
     public function show($id)
     {
+        // testing
         $exchange = Exchange::find($id);
         return view('exchanges.show')->with('exchange', $exchange);
     }
