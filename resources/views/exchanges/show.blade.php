@@ -6,14 +6,14 @@
             <h3>Exchange Program Record Details</h3>
         </div>
         <div class="d-flex justify-content-end">
-            <a href='{{ url("/exchanges/$exchange->id/edit") }}' class="btn btn-primary mx-2">Edit Exchange Program Detail</a>
-            {!! Form::open(['route' => ['exchanges.destroy', $exchange->id], 'method' => 'POST']) !!}
+            <a href='{{ url("/exchanges/$exchangeRecord->id/edit") }}' class="btn btn-primary mx-2">Edit Exchange Program Detail</a>
+            {!! Form::open(['route' => ['exchanges.destroy', $exchangeRecord->id], 'method' => 'POST']) !!}
                 {{ Form::hidden('_method', 'DELETE') }}
                 {{ Form::submit('Delete Exchange Program Detail', ['class' => 'btn btn-danger mx-2']) }}
             {!! Form::close() !!}
                 <a href='{{ url("/exchanges/") }}' class="btn btn-secondary mx-2">Go Back</a>
         </div>
-       
+
     </div>
 
     <!-- Device Details Content -->
@@ -22,9 +22,9 @@
             <div class="col-md-12">
                 <h4>Device Details</h4>
             </div>
-            
+
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -32,7 +32,7 @@
                         <p>Brand</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->brand }}</p>
+                        <p>: {{ $otherDevice->device_brand }}</p>
                     </div>
                 </div>
             </div>
@@ -42,12 +42,12 @@
                         <p>Model</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->model }}</p>
+                        <p>: {{ $otherDevice->device_model }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -55,19 +55,19 @@
                         <p>Serial Number</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->serial_no }}</p>
+                        <p>: {{ $exchangeRecord->other_device_serial_no }}</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="row">
                     <div class="col-md-6">
-                        <img class="img-thumbnail" src="{{ url("/storage/serial_no_images/$exchange->serial_no_image") }}" />
+                        <img class="img-thumbnail" src="{{ url("/storage/serial_no_images/$exchangeRecord->other_device_serial_no_image") }}" />
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -75,7 +75,7 @@
                         <p>Exchanged Model</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->exchange_model }}</p>
+                        <p>: {{ $ourDevice->device_model }}</p>
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@
                         <p>Exchanged Serial Number</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->exchange_serial_no }}</p>
+                        <p>: {{ $exchangeRecord->our_device_serial_no }}</p>
                     </div>
                 </div>
             </div>
@@ -99,7 +99,7 @@
                 <h4>Patient Details</h4>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -107,7 +107,7 @@
                         <p>Patient's Name</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_name }}</p>
+                        <p>: {{ $patient->patient_name }}</p>
                     </div>
                 </div>
             </div>
@@ -117,12 +117,12 @@
                         <p>Patient's Date of Birth</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_dob }}</p>
+                        <p>: {{ $patient->patient_dob }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -130,7 +130,7 @@
                         <p>Patient's Phone Number</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_phone_no }}</p>
+                        <p>: {{ $patient->patient_phone }}</p>
                     </div>
                 </div>
             </div>
@@ -140,12 +140,12 @@
                         <p>Patient's Email</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_email }}</p>
+                        <p>: {{ $patient->patient_email }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -153,7 +153,7 @@
                         <p>Patient's Address Line 1</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_addr_1 }}</p>
+                        <p>: {{ $patient->patient_address_1 }}</p>
                     </div>
                 </div>
             </div>
@@ -163,12 +163,12 @@
                         <p>Patient's Address Line 2</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_addr_2 }}</p>
+                        <p>: {{ $patient->patient_address_2 }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -176,7 +176,7 @@
                         <p>Patient's City</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_city }}</p>
+                        <p>: {{ $patient->patient_city }}</p>
                     </div>
                 </div>
             </div>
@@ -186,12 +186,12 @@
                         <p>Patient's State</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_state }}</p>
+                        <p>: {{ $patient->patient_state }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -199,7 +199,7 @@
                         <p>Patient's Zipcode</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_zipcode }}</p>
+                        <p>: {{ $patient->patient_postcode }}</p>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,7 @@
                         <p>Patient's Diabetes Type</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->patient_diabetes }}</p>
+                        <p>: {{ $patient->patient_diabetes_type }}</p>
                     </div>
                 </div>
             </div>
@@ -223,7 +223,7 @@
                 <h4>Pharmacy Details</h4>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -231,7 +231,7 @@
                         <p>Pharmacy's Name</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_name }}</p>
+                        <p>: {{ $pharmacy->pharmacy_name }}</p>
                     </div>
                 </div>
             </div>
@@ -241,12 +241,12 @@
                         <p>Pharmacy's Account Number</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_account_no }}</p>
+                        <p>: {{ $pharmacy->pharmacy_account_no }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -254,7 +254,7 @@
                         <p>Pharmacy's Address Line 1</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_addr_1 }}</p>
+                        <p>: {{ $pharmacy->pharmacy_address_1 }}</p>
                     </div>
                 </div>
             </div>
@@ -264,12 +264,12 @@
                         <p>Pharmacy's Address Line 2</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_addr_2 }}</p>
+                        <p>: {{ $pharmacy->pharmacy_address_2 }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -277,7 +277,7 @@
                         <p>Pharmacy's City</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_city }}</p>
+                        <p>: {{ $pharmacy->pharmacy_city }}</p>
                     </div>
                 </div>
             </div>
@@ -287,12 +287,12 @@
                         <p>Pharmacy's State</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_state }}</p>
+                        <p>: {{ $pharmacy->pharmacy_state }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -300,12 +300,12 @@
                         <p>Pharmacy's Zipcode</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_zipcode }}</p>
+                        <p>: {{ $pharmacy->pharmacy_postcode }}</p>
                     </div>
                 </div>
             </div>
         </div>
-    
+
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -313,7 +313,7 @@
                         <p>Pharmacy's PIC</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_pic }}</p>
+                        <p>: {{ $pharmacy->pharmacy_pic }}</p>
                     </div>
                 </div>
             </div>
@@ -323,12 +323,12 @@
                         <p>Pharmacy's PIC Contact</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $exchange->pharmacy_contact }}</p>
+                        <p>: {{ $pharmacy->pharmacy_phone }}</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    
+
 @endsection

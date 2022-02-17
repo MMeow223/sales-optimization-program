@@ -12,3 +12,5 @@ require("./angularScripts");
 
 // Custom chart script
 require("./chartScripts");
+
+require("highcharts");

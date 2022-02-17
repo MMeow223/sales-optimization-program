@@ -55,6 +55,9 @@
                                 <button type="submit" class="btn btn-primary w-25">
                                     {{ __('Login') }}
                                 </button>
+                                <a href="/exchanges/create"  class="btn btn-outline-primary w-25">
+                                    {{ __('Record Exchange Instead') }}
+                                </a>
                             </div>
                         </div>
 

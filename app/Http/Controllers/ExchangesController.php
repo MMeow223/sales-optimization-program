@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Devices;
+use App\Models\ExchangeRecords;
+use App\Models\Patients;
+use App\Models\Pharmacies;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Exchange;
 use Illuminate\Support\Facades\Auth;
@@ -27,10 +32,9 @@ class ExchangesController extends Controller
      */
     public function index()
     {
-        // $exchanges = Exchange::all();
-
-        $exchanges = Exchange::orderBy('updated_at', 'desc')->paginate(4);
-        return view('exchanges.index')->with('exchanges', $exchanges);
+        return view('exchanges.index')
+            ->with('exchanges', ExchangeRecords::orderBy('updated_at', 'desc')->paginate(10))
+            ->with('devices', Devices::all());
     }
 
     /**
@@ -40,7 +44,33 @@ class ExchangesController extends Controller
      */
     public function create()
     {
-        return view('exchanges.create');
+        $devices = Devices::all();
+        $pharmacies = Pharmacies::all();
+
+        $deviceBrands = array();
+        foreach($devices as $device){
+            if($device->is_active) {
+                $deviceBrands[$device->device_brand] = $device->device_brand;
+            }
+        }
+
+        $deviceModels = array();
+        foreach($devices as $device){
+            if($device->is_active){
+                $deviceModels[$device->device_model] = $device->device_model;
+            }
+        }
+
+        $pharmacyArray = array();
+        foreach($pharmacies as $pharmacy){
+            $pharmacyArray[$pharmacy->pharmacy_account_no] = $pharmacy->pharmacy_name;
+        }
+
+        return view('exchanges.create')
+            ->with('deviceBrands', $deviceBrands)
+            ->with('deviceModels', $deviceModels)
+            ->with('pharmacyArray', $pharmacyArray)
+            ;
     }
 
     /**
@@ -52,84 +82,110 @@ class ExchangesController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'brand' => 'required',
-            'model' => 'required',
-            'serial_no' => 'required',
-            'serial_no_image' => 'image|nullable|max:1999',
-            'exchange_model' => 'required',
-            'exchange_serial_no' => 'required',
+            'other_device_brand' => 'required',
+            'other_device_model' => 'required',
+            'other_device_serial_no' => 'required',
+            'our_device_model' => 'required',
+            'our_device_serial_no' => 'required',
             'patient_name' => 'required',
             'patient_dob' => 'required',
-            'patient_phone_no' => 'required',
+            'patient_phone' => 'required',
             'patient_email' => 'required',
-            'patient_addr_1' => 'required',
-            'patient_addr_2' => 'nullable',
+            'patient_address_1' => 'required',
+            'patient_address_2' => 'nullable',
             'patient_city' => 'required',
             'patient_state' => 'required',
-            'patient_zipcode' => 'required',
-            'patient_diabetes' => 'required',
-            'pharmacy_name' => 'required',
+            'patient_postcode' => 'required',
+            'patient_diabetes_type' => 'required',
             'pharmacy_account_no' => 'required',
-            'pharmacy_addr_1' => 'required',
-            'pharmacy_city' => 'required',
-            'pharmacy_state' => 'required',
-            'pharmacy_zipcode' => 'required',
-            'pharmacy_pic' => 'required',
-            'pharmacy_contact' => 'required'
         ]);
 
         // Handle file upload
-        if ($request->hasFile('serial_no_image')) {
+        if ($request->hasFile('other_device_serial_no_image')) {
             // Get filename with extension
-            $fileNameWithExt = $request->file('serial_no_image')->getClientOriginalName();
+            $fileNameWithExt = $request->file('other_device_serial_no_image')->getClientOriginalName();
 
             // Get just filename
             $fileName = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
 
             // Get just extension
-            $extension = $request->file('serial_no_image')->getClientOriginalExtension();
+            $extension = $request->file('other_device_serial_no_image')->getClientOriginalExtension();
 
             // Filename to store
             $fileNameToStore = $fileName . '_' . time() . '.' . $extension;
 
             // Upload Image
-            $path = $request->file('serial_no_image')->storeAs('public/serial_no_images', $fileNameToStore);
+            $path = $request->file('other_device_serial_no_image')->storeAs('public/serial_no_images', $fileNameToStore);
         } else {
             $fileNameToStore = 'placeholder.jpg';
         }
 
-        $exchange = new Exchange;
-        $exchange->brand = $request->input('brand');
-        $exchange->model = $request->input('model');
-        $exchange->serial_no = $request->input('serial_no');
-        $exchange->serial_no_image = $fileNameToStore;
-        $exchange->exchange_model = $request->input('exchange_model');
-        $exchange->exchange_serial_no = $request->input('exchange_serial_no');
+        // create new exchange record and patient
+        $exchangeRecord = new ExchangeRecords();
+        $patient = new Patients();
 
-        $exchange->patient_name = $request->input('patient_name');
-        $exchange->patient_dob = $request->input('patient_dob');
-        $exchange->patient_phone_no = $request->input('patient_phone_no');
-        $exchange->patient_email = $request->input('patient_email');
-        $exchange->patient_addr_1 = $request->input('patient_addr_1');
-        $exchange->patient_addr_2 = $request->input('patient_addr_2');
-        $exchange->patient_city = $request->input('patient_city');
-        $exchange->patient_state = $request->input('patient_state');
-        $exchange->patient_zipcode = $request->input('patient_zipcode');
-        $exchange->patient_diabetes = $request->input('patient_diabetes');
+        // assign values to patient
+        $patient->patient_name = $request->input('patient_name');
+        $patient->patient_dob = $request->input('patient_dob');
+        $patient->patient_phone = $request->input('patient_phone');
+        $patient->patient_email = $request->input('patient_email');
+        $patient->patient_address_1 = $request->input('patient_address_1');
+        $patient->patient_address_2 = $request->input('patient_address_2');
+        $patient->patient_city = $request->input('patient_city');
+        $patient->patient_state = $request->input('patient_state');
+        $patient->patient_postcode = $request->input('patient_postcode');
+        $patient->patient_diabetes_type = $request->input('patient_diabetes_type');
+        $patient->total_exchanged = 0;
+        $patient->save();
 
-        $exchange->pharmacy_name = $request->input('pharmacy_name');
-        $exchange->pharmacy_account_no = $request->input('pharmacy_account_no');
-        $exchange->pharmacy_addr_1 = $request->input('pharmacy_addr_1');
-        $exchange->pharmacy_addr_2 = $request->input('pharmacy_addr_2');
-        $exchange->pharmacy_city = $request->input('pharmacy_city');
-        $exchange->pharmacy_state = $request->input('pharmacy_state');
-        $exchange->pharmacy_zipcode = $request->input('pharmacy_zipcode');
-        $exchange->pharmacy_pic = $request->input('pharmacy_pic');
-        $exchange->pharmacy_contact = $request->input('pharmacy_contact');
-        $exchange->save();
+        $otherDeviceId = Devices::where('device_brand', $request->input('other_device_brand'))
+            ->where('device_model', $request->input('other_device_model'))
+            ->first()->id;
+
+        $ourDeviceId = Devices::where('device_model', $request->input('our_device_model'))->first()->id;
+
+        $patientId = Patients::where('patient_name',$request->input('patient_name'))->first()->id;
+
+        $pharmacyId = Pharmacies::where('pharmacy_account_no', $request->input('pharmacy_account_no'))->first()->id;
+        // assign values to exchange record
+        $exchangeRecord->other_device_id = $otherDeviceId;
+
+        $exchangeRecord->our_device_id = $ourDeviceId;
+
+        $exchangeRecord->pharmacy_id = $pharmacyId;
+
+        $device =  Devices::find($otherDeviceId);
+        $device->total_exchanged +=1;
+        $device->save();
+
+        $device =  Devices::find($ourDeviceId);
+        $device->total_exchanged +=1;
+        $device->save();
+
+        $patient = Patients::find($patientId);
+        $patient->total_exchanged +=1;
+        $patient->save();
+
+        $pharmacy = Pharmacies::find($pharmacyId);
+        $pharmacy->total_exchanged +=1;
+        $pharmacy->save();
+
+        $exchangeRecord->patient_id = $patient->id;
+        $exchangeRecord->other_device_serial_no = $request->input('other_device_serial_no');
+        $exchangeRecord->our_device_serial_no = $request->input('our_device_serial_no');
+        $exchangeRecord->other_device_serial_no_image = $request->input('other_device_serial_no_image');
+
+        if ($request->hasFile('other_device_serial_no_image')) {
+            if ($exchangeRecord->other_device_serial_no_image != 'placeholder.jpg') {
+                Storage::delete('public/serial_no_images/' . $exchangeRecord->other_device_serial_no_image);
+            }
+            $exchangeRecord->other_device_serial_no_image = $fileNameToStore;
+        }
+
+        $exchangeRecord->save();
 
         if (Auth::user()) { // If user is logged in, redirect to exchanges list page
-            return redirect('/exchanges')->with('success', 'Control Exchange Detail Added Successfully!');
+            return redirect('/exchanges/'.$exchangeRecord->id)->with('success', 'Control Exchange Detail Added Successfully!');
         } else { // If user is guest, redirect to create page
             return redirect('/exchanges/create')->with('success', 'Control Exchange Detail Added Successfully!');
         }
@@ -143,9 +199,16 @@ class ExchangesController extends Controller
      */
     public function show($id)
     {
-        // testing
-        $exchange = Exchange::find($id);
-        return view('exchanges.show')->with('exchange', $exchange);
+
+        $exchangeRecord = ExchangeRecords::find($id);
+
+        return view('exchanges.show')
+            ->with('exchangeRecord', $exchangeRecord)
+            ->with('otherDevice', Devices::find($exchangeRecord->other_device_id))
+            ->with('ourDevice', Devices::find($exchangeRecord->our_device_id))
+            ->with('pharmacy', Pharmacies::find($exchangeRecord->pharmacy_id))
+            ->with('patient', Patients::find($exchangeRecord->patient_id));
+
     }
 
     /**
@@ -156,8 +219,46 @@ class ExchangesController extends Controller
      */
     public function edit($id)
     {
-        $exchange = Exchange::find($id);
-        return view('exchanges.edit')->with('exchange', $exchange);
+        $exchangeRecord = ExchangeRecords::find($id);
+
+//        dd($exchangeRecord);
+        $devices = Devices::all();
+        $pharmacies = Pharmacies::all();
+
+        $deviceBrands = array();
+        foreach($devices as $device){
+            if($device->is_active) {
+                $deviceBrands[$device->device_brand] = $device->device_brand;
+            }
+        }
+
+        $deviceModels = array();
+        foreach($devices as $device){
+            if($device->is_active) {
+                $deviceModels[$device->device_model] = $device->device_model;
+            }
+        }
+
+        $pharmacyArray = array();
+        foreach($pharmacies as $pharmacy){
+            $pharmacyArray[$pharmacy->pharmacy_name] = $pharmacy->pharmacy_name;
+        }
+//        dd($pharmacyArray);
+
+//        dd(Pharmacies::find($exchangeRecord->pharmacy_id));
+
+        return view('exchanges.edit')
+            ->with('exchangeRecord', $exchangeRecord)
+            ->with('otherDevice', Devices::find($exchangeRecord->other_device_id))
+            ->with('ourDevice', Devices::find($exchangeRecord->our_device_id))
+            ->with('pharmacy', Pharmacies::find($exchangeRecord->pharmacy_id))
+            ->with('patient', Patients::find($exchangeRecord->patient_id))
+
+            ->with('deviceBrands', $deviceBrands)
+            ->with('deviceModels', $deviceModels)
+            ->with('pharmacyArray', $pharmacyArray)
+            ->with('patients', Patients::all());
+            ;
     }
 
     /**
@@ -170,83 +271,130 @@ class ExchangesController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'brand' => 'required',
-            'model' => 'required',
-            'serial_no' => 'required',
-            'exchange_model' => 'required',
-            'exchange_serial_no' => 'required',
+            'other_device_brand' => 'required',
+            'other_device_model' => 'required',
+            'other_device_serial_no' => 'required',
+            'our_device_model' => 'required',
+            'our_device_serial_no' => 'required',
             'patient_name' => 'required',
             'patient_dob' => 'required',
-            'patient_phone_no' => 'required',
+            'patient_phone' => 'required',
             'patient_email' => 'required',
-            'patient_addr_1' => 'required',
-            'patient_addr_2' => 'nullable',
+            'patient_address_1' => 'required',
+            'patient_address_2' => 'nullable',
             'patient_city' => 'required',
             'patient_state' => 'required',
-            'patient_zipcode' => 'required',
-            'patient_diabetes' => 'required',
+            'patient_postcode' => 'required',
+            'patient_diabetes_type' => 'required',
             'pharmacy_name' => 'required',
-            'pharmacy_account_no' => 'required',
-            'pharmacy_addr_1' => 'required',
-            'pharmacy_city' => 'required',
-            'pharmacy_state' => 'required',
-            'pharmacy_zipcode' => 'required',
-            'pharmacy_pic' => 'required',
-            'pharmacy_contact' => 'required'
         ]);
 
         // Handle file upload
-        if ($request->hasFile('serial_no_image')) {
+        if ($request->hasFile('other_device_serial_no_image')) {
             // Get filename with extension
-            $fileNameWithExt = $request->file('serial_no_image')->getClientOriginalName();
+            $fileNameWithExt = $request->file('other_device_serial_no_image')->getClientOriginalName();
 
             // Get just filename
             $fileName = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
 
             // Get just extension
-            $extension = $request->file('serial_no_image')->getClientOriginalExtension();
+            $extension = $request->file('other_device_serial_no_image')->getClientOriginalExtension();
 
             // Filename to store
             $fileNameToStore = $fileName . '_' . time() . '.' . $extension;
 
             // Upload Image
-            $path = $request->file('serial_no_image')->storeAs('public/serial_no_images', $fileNameToStore);
+            $path = $request->file('other_device_serial_no_image')->storeAs('public/serial_no_images', $fileNameToStore);
         }
 
-        $exchange = Exchange::find($id);
-        $exchange->brand = $request->input('brand');
-        $exchange->model = $request->input('model');
-        $exchange->serial_no = $request->input('serial_no');
-        if ($request->hasFile('serial_no_image')) {
-            if ($exchange->serial_no_image != 'placeholder.jpg') {
-                Storage::delete('public/serial_no_images/' . $exchange->serial_no_image);
+        // get the data from table first
+        $exchangeRecord = ExchangeRecords::find($id);
+        $patient = Patients::find($exchangeRecord->patient_id);
+
+        // backup
+        $oldOtherDevice = Devices::find($exchangeRecord->other_device_id);
+        $oldOurDevice = Devices::find($exchangeRecord->our_device_id);
+        $oldPharmacy = Pharmacies::find($exchangeRecord->pharmacy_id);
+
+        // update patient details
+        $patient->patient_name = $request->input('patient_name');
+        $patient->patient_dob = $request->input('patient_dob');
+        $patient->patient_phone = $request->input('patient_phone');
+        $patient->patient_email = $request->input('patient_email');
+        $patient->patient_address_1 = $request->input('patient_address_1');
+        $patient->patient_address_2 = $request->input('patient_address_2');
+        $patient->patient_city = $request->input('patient_city');
+        $patient->patient_state = $request->input('patient_state');
+        $patient->patient_postcode = $request->input('patient_postcode');
+        $patient->patient_diabetes_type = $request->input('patient_diabetes_type');
+        $patient->save();
+
+
+
+        // the new id for the three foreign key
+        $newOtherDevice = Devices::find(
+            Devices::where('device_brand', $request->input('other_device_brand'))
+                ->where('device_model', $request->input('other_device_model'))
+                ->first()->id
+        );
+
+        $newOurDevice =  Devices::find(
+            Devices::where('device_brand',"Ubisson")
+                ->where('device_model', $request->input('our_device_model'))
+                ->first()->id
+        );
+
+//        dd($request->input('pharmacy_name'));
+        $newPharmacy = Pharmacies::find(
+            Pharmacies::where('pharmacy_name', $request->input('pharmacy_name'))
+                ->first()->id
+        );
+
+        // update exchange record details
+        $exchangeRecord->other_device_id = $newOtherDevice->id;
+        $exchangeRecord->our_device_id = $newOurDevice->id;
+        $exchangeRecord->pharmacy_id = $newPharmacy->id;
+        $exchangeRecord->other_device_serial_no = $request->input('other_device_serial_no');
+        $exchangeRecord->our_device_serial_no = $request->input('our_device_serial_no');
+        $exchangeRecord->other_device_serial_no_image = $request->input('other_device_serial_no_image');
+
+        if ($request->hasFile('other_device_serial_no_image')) {
+            if ($exchangeRecord->other_device_serial_no_image != 'placeholder.jpg') {
+                Storage::delete('public/serial_no_images/' . $exchangeRecord->other_device_serial_no_image);
             }
-            $exchange->serial_no_image = $fileNameToStore;
+            $exchangeRecord->other_device_serial_no_image = $fileNameToStore;
         }
-        $exchange->exchange_model = $request->input('exchange_model');
-        $exchange->exchange_serial_no = $request->input('exchange_serial_no');
 
-        $exchange->patient_name = $request->input('patient_name');
-        $exchange->patient_dob = $request->input('patient_dob');
-        $exchange->patient_phone_no = $request->input('patient_phone_no');
-        $exchange->patient_email = $request->input('patient_email');
-        $exchange->patient_addr_1 = $request->input('patient_addr_1');
-        $exchange->patient_addr_2 = $request->input('patient_addr_2');
-        $exchange->patient_city = $request->input('patient_city');
-        $exchange->patient_state = $request->input('patient_state');
-        $exchange->patient_zipcode = $request->input('patient_zipcode');
-        $exchange->patient_diabetes = $request->input('patient_diabetes');
 
-        $exchange->pharmacy_name = $request->input('pharmacy_name');
-        $exchange->pharmacy_account_no = $request->input('pharmacy_account_no');
-        $exchange->pharmacy_addr_1 = $request->input('pharmacy_addr_1');
-        $exchange->pharmacy_addr_2 = $request->input('pharmacy_addr_2');
-        $exchange->pharmacy_city = $request->input('pharmacy_city');
-        $exchange->pharmacy_state = $request->input('pharmacy_state');
-        $exchange->pharmacy_zipcode = $request->input('pharmacy_zipcode');
-        $exchange->pharmacy_pic = $request->input('pharmacy_pic');
-        $exchange->pharmacy_contact = $request->input('pharmacy_contact');
-        $exchange->save();
+
+        // update other device
+        if($oldOtherDevice != $newOtherDevice){
+            $oldOtherDevice->total_exchanged -=1;
+            $newOtherDevice->total_exchanged +=1;
+        }
+        $oldOtherDevice->save();
+        $newOtherDevice->save();
+
+
+        // update our device
+        if($oldOurDevice != $newOurDevice){
+            $oldOurDevice->total_exchanged -=1;
+            $newOurDevice->total_exchanged +=1;
+        }
+        $oldOurDevice->save();
+        $newOurDevice->save();
+
+        // update pharmacy
+        if($oldPharmacy != $newPharmacy){
+            $oldPharmacy->total_exchanged -=1;
+            $newPharmacy->total_exchanged +=1;
+        }
+        $oldPharmacy->save();
+        $newPharmacy->save();
+
+
+
+        $exchangeRecord->save();
 
         return redirect('/exchanges/'.$id)->with('success', 'Control Exchange Detail Edited Successfully!');
     }
@@ -259,14 +407,14 @@ class ExchangesController extends Controller
      */
     public function destroy($id)
     {
-        $exchange = Exchange::find($id);
+        $exchangeRecord = ExchangeRecords::find($id);
 
-        if ($exchange->serial_no_image != 'placeholder.jpg') {
+        if ($exchangeRecord->serial_no_image != 'placeholder.jpg') {
             // Delete Image
-            Storage::delete('public/serial_no_images/' . $exchange->serial_no_image);
+            Storage::delete('public/serial_no_images/' . $exchangeRecord->other_device_serial_no_image);
         }
 
-        $exchange->delete();
+        $exchangeRecord->delete();
         return redirect('/exchanges')->with('success', 'Control Exchange Detail Deleted Successfully!');
     }
 }

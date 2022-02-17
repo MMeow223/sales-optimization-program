@@ -10,78 +10,43 @@
         </div>
     </div>
 
-    @if (count($exchanges) > 0)
-        @foreach ($exchanges as $exchange)
-            <a href='{{ url("/exchanges/$exchange->id") }}' class="linkCard">
-                <div class="card p-3 mb-2">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h4>Brand: {{ $exchange->brand }}</h4>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <small>Created at: {{ $exchange->created_at }}</small>
-                            <br>
-                            <small>Updated at: {{ $exchange->updated_at }}</small>
-                        </div>
-                    </div>
+    <table class="table table-hover table-light">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Others Brand</th>
+                <th>Others Model</th>
+                <th>Others Serial Number</th>
+                <th>Ours Model</th>
+                <th>Ours Serial Number</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (count($exchanges) > 0)
+            @foreach ($exchanges as $exchange)
+                <tr>
+                    <td><a href="{{url("/exchanges/$exchange->id")}}">{{$exchange->id}}</a></td>
+                    <td>{{ $devices->find($exchange->other_device_id)->device_brand }}</td>
+                    <td>{{ $devices->find($exchange->other_device_id)->device_model }}</td>
+                    <td>{{ $exchange->other_device_serial_no}}</td>
+                    <td>{{ $devices->find($exchange->our_device_id)->device_model }}</td>
+                    <td>{{ $exchange->our_device_serial_no}}</td>
+                    <td>{{ $exchange->created_at}}</td>
+                    <td>{{ $exchange->updated_at}}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+            <!-- Pagination will appear when there's more than 4 items -->
+            <div class="d-flex justify-content-center">
+                {!! $exchanges->links() !!}
+            </div>
+        @else
+            <tr>
+                <td colspan="5">No records found</td>
+            </tr>
+        @endif
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <p>Model</p>
-                                </div>
-                                <div class="col-md-8">
-                                    <p>: {{ $exchange->model }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <p>Serial Number</p>
-                                </div>
-                                <div class="col-md-8">
-                                    <p>: {{ $exchange->serial_no }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <p>Exchanged Model</p>
-                                </div>
-                                <div class="col-md-8">
-                                    <p>: {{ $exchange->exchange_model }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <p>Exchanged Serial Number</p>
-                                </div>
-                                <div class="col-md-8">
-                                    <p>: {{ $exchange->exchange_serial_no }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </a>
-        @endforeach
-
-        <!-- Pagination will appear when there's more than 4 items -->
-        <div class="d-flex justify-content-center">
-            {!! $exchanges->links() !!}
-        </div>
-
-    @else
-        <p>No exchanges found.</p>
-    @endif
 @endsection

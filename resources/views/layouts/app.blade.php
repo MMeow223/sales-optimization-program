@@ -21,6 +21,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
@@ -49,6 +50,15 @@
                     <ul class="navbar-nav me-auto" id="navbarLinkList">
                         <li class="nav-item {{ (request()->is('/')) ? 'activeNavItem' : '' }}">
                             <a class="nav-link {{ (request()->is('/')) ? 'active' : '' }}" href="{{ url('/') }}">Dashboard</a>
+                        </li>
+                        <li class="nav-item {{ (request()->is('patients*')) ? 'activeNavItem' : '' }}">
+                            <a class="nav-link {{ (request()->is('patients*')) ? 'active' : '' }}" href="{{ url('/patients') }}">Patients</a>
+                        </li>
+                        <li class="nav-item {{ (request()->is('pharmacies*')) ? 'activeNavItem' : '' }}">
+                            <a class="nav-link {{ (request()->is('pharmacies*')) ? 'active' : '' }}" href="{{ url('/pharmacies') }}">Pharmacies</a>
+                        </li>
+                        <li class="nav-item {{ (request()->is('devices*')) ? 'activeNavItem' : '' }}">
+                            <a class="nav-link {{ (request()->is('devices*')) ? 'active' : '' }}" href="{{ url('/devices') }}">Devices</a>
                         </li>
                         <li class="nav-item {{ (request()->is('exchanges*')) ? 'activeNavItem' : '' }}">
                             <a class="nav-link {{ (request()->is('exchanges*')) ? 'active' : '' }}" href="{{ url('/exchanges') }}">Control Exchange</a>
