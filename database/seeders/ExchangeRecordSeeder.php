@@ -20,7 +20,7 @@ class ExchangeRecordSeeder extends Seeder
     {
         $faker = Factory::create();
 
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < 5000; $i++) {
             $other_device_id = DB::table('devices')->where('device_brand','!=','Ubisson')->get()->random()->id;
             $our_device_id = DB::table('devices')->where('device_brand','=','Ubisson')->get()->random()->id;
             $patient_id =DB::table('patients')->get()->random()->id;

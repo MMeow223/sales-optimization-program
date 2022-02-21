@@ -11336,3 +11336,7 @@ body {
   float: none;
   padding: inherit;
 }
+
+.table {
+  background-color: white;
+}

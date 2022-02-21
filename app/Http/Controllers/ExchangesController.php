@@ -32,9 +32,7 @@ class ExchangesController extends Controller
      */
     public function index()
     {
-        return view('exchanges.index')
-            ->with('exchanges', ExchangeRecords::orderBy('updated_at', 'desc')->paginate(10))
-            ->with('devices', Devices::all());
+        return view('exchanges.index');
     }
 
     /**
@@ -44,21 +42,30 @@ class ExchangesController extends Controller
      */
     public function create()
     {
-        $devices = Devices::all();
-        $pharmacies = Pharmacies::all();
+        $otherDevices = Devices::where('device_brand',"!=","Ubisson")
+            ->where("is_active","=",true)
+            ->get();
 
-        $deviceBrands = array();
-        foreach($devices as $device){
-            if($device->is_active) {
-                $deviceBrands[$device->device_brand] = $device->device_brand;
-            }
+        $ourDevices = Devices::where('device_brand',"=","Ubisson")
+            ->where("is_active","=",true)
+            ->get();
+
+        $pharmacies = Pharmacies::where("is_active","=",true)
+            ->get();
+
+        $otherDeviceBrands = array();
+        foreach($otherDevices as $device){
+            $otherDeviceBrands[$device->device_brand] = $device->device_brand;
         }
 
-        $deviceModels = array();
-        foreach($devices as $device){
-            if($device->is_active){
-                $deviceModels[$device->device_model] = $device->device_model;
-            }
+        $otherDeviceModels = array();
+        foreach($otherDevices as $device){
+            $otherDeviceModels[$device->device_model] = $device->device_model;
+        }
+
+        $ourDeviceModels = array();
+        foreach($ourDevices as $device){
+            $ourDeviceModels[$device->device_model] = $device->device_model;
         }
 
         $pharmacyArray = array();
@@ -66,9 +73,16 @@ class ExchangesController extends Controller
             $pharmacyArray[$pharmacy->pharmacy_account_no] = $pharmacy->pharmacy_name;
         }
 
+        asort($otherDeviceBrands);
+        asort($otherDeviceModels);
+        asort($ourDeviceModels);
+        asort($pharmacyArray);
+
+
         return view('exchanges.create')
-            ->with('deviceBrands', $deviceBrands)
-            ->with('deviceModels', $deviceModels)
+            ->with('otherDeviceBrands', $otherDeviceBrands)
+            ->with('otherDeviceModels', $otherDeviceModels)
+            ->with('ourDeviceModels', $ourDeviceModels)
             ->with('pharmacyArray', $pharmacyArray)
             ;
     }
@@ -142,7 +156,8 @@ class ExchangesController extends Controller
             ->where('device_model', $request->input('other_device_model'))
             ->first()->id;
 
-        $ourDeviceId = Devices::where('device_model', $request->input('our_device_model'))->first()->id;
+        $ourDeviceId = Devices::where('device_brand',"=","Ubisson")
+            ->where('device_model', $request->input('our_device_model'))->first()->id;
 
         $patientId = Patients::where('patient_name',$request->input('patient_name'))->first()->id;
 
@@ -416,5 +431,21 @@ class ExchangesController extends Controller
 
         $exchangeRecord->delete();
         return redirect('/exchanges')->with('success', 'Control Exchange Detail Deleted Successfully!');
+    }
+
+    public function updateDeviceModelOption(Request $request)
+    {
+
+        $devices = Devices::where('device_brand','=',$request->devicebrand)
+            ->where('is_active',true)
+            ->select('device_model')
+            ->get();
+
+        $html = "";
+        foreach ($devices as $device){
+            $html .= "<option>".$device->device_model."</option>";
+        }
+
+        return response()->json($html);
     }
 }

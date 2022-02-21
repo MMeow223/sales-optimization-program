@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header text-center">
                     <h3>Ubisson Sales Optimisation Platform Login</h3>
                 </div>
 
@@ -61,18 +61,18 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-6 text-md-end">
-                                @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
-                                        {{ __('Forgot Your Password?') }}
-                                    </a>
-                                @endif
-                            </div>
-                            <div class="col-6">
-                                <a class="btn btn-link" href="{{ route('register') }}">Don't have an account?</a>
-                            </div>
-                        </div>
+{{--                        <div class="row">--}}
+{{--                            <div class="col-6 text-md-end">--}}
+{{--                                @if (Route::has('password.request'))--}}
+{{--                                    <a class="btn btn-link" href="{{ route('password.request') }}">--}}
+{{--                                        {{ __('Forgot Your Password?') }}--}}
+{{--                                    </a>--}}
+{{--                                @endif--}}
+{{--                            </div>--}}
+{{--                            <div class="col-6">--}}
+{{--                                <a class="btn btn-link" href="{{ route('register') }}">Don't have an account?</a>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
                     </form>
                 </div>
             </div>

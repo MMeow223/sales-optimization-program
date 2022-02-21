@@ -3,7 +3,7 @@
 @section('content')
     <div class="row mb-2">
         <div class="col-md-8">
-            <h3>Exchange Program Record Details</h3>
+            <h3>Pharmacy Details</h3>
         </div>
         <div class="d-flex justify-content-end">
             <a href='{{ url("/pharmacies/$pharmacy->id/edit") }}' class="btn btn-primary mx-2">Edit Pharmacy Detail</a>

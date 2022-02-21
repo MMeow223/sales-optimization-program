@@ -6,47 +6,70 @@
             <h3>Control Exchange Program List</h3>
         </div>
         <div class="col-md-6 text-end">
-           <a href='{{ url("/exchanges/create") }}' class="btn btn-success">Add Exchange Program Record</a>
+            <a href='{{ url("/exchanges/create") }}' class="btn btn-success">Add Exchange Program Record</a>
         </div>
     </div>
 
-    <table class="table table-hover table-light">
+    <table id="exchange-table" class="table table-striped" style="width:100%">
         <thead>
-            <tr>
-                <th>#</th>
-                <th>Others Brand</th>
-                <th>Others Model</th>
-                <th>Others Serial Number</th>
-                <th>Ours Model</th>
-                <th>Ours Serial Number</th>
-                <th>Created At</th>
-                <th>Updated At</th>
-            </tr>
+        <tr>
+            <th>#</th>
+            <th>Patient Name</th>
+            <th>Others Brand</th>
+            <th>Others Model</th>
+            <th>Others Serial Number</th>
+            <th>Ours Model</th>
+            <th>Ours Serial Number</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+        </tr>
         </thead>
         <tbody>
-        @if (count($exchanges) > 0)
-            @foreach ($exchanges as $exchange)
-                <tr>
-                    <td><a href="{{url("/exchanges/$exchange->id")}}">{{$exchange->id}}</a></td>
-                    <td>{{ $devices->find($exchange->other_device_id)->device_brand }}</td>
-                    <td>{{ $devices->find($exchange->other_device_id)->device_model }}</td>
-                    <td>{{ $exchange->other_device_serial_no}}</td>
-                    <td>{{ $devices->find($exchange->our_device_id)->device_model }}</td>
-                    <td>{{ $exchange->our_device_serial_no}}</td>
-                    <td>{{ $exchange->created_at}}</td>
-                    <td>{{ $exchange->updated_at}}</td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-            <!-- Pagination will appear when there's more than 4 items -->
-            <div class="d-flex justify-content-center">
-                {!! $exchanges->links() !!}
-            </div>
-        @else
-            <tr>
-                <td colspan="5">No records found</td>
-            </tr>
-        @endif
+        </tbody>
+    </table>
+    <script>
+
+        $(document).ready(function () {
+            $('#exchange-table').DataTable({
+                ajax: "{{route('api.exchanges.index')}}",
+                processing: true,
+                serverSide: true,
+                columns: [
+                    {
+                        data: 'id',
+                        render: function (data, type, row, meta) {
+                            return '<a href="/exchanges/' + data + '">' + data + '</a>';
+                        }
+                    },
+                    {data: 'patient.patient_name'},
+                    {data: 'other_device.device_brand'},
+                    {data: 'other_device_serial_no'},
+                    {data: 'other_device.device_model'},
+                    {data: 'our_device.device_model'},
+                    {data: 'our_device_serial_no'},
+                    {
+                        data: 'created_at',
+                        render: function (data, type, row, meta) {
+
+                            data = data.split('.')[0]
+                            data = data.split('T')[0] + " | " + data.split('T')[1]
+
+                            return data;
+                        }
+                    },
+                    {
+                        data: 'updated_at',
+                        render: function (data, type, row, meta) {
+
+                            data = data.split('.')[0]
+                            data = data.split('T')[0] + " | " + data.split('T')[1]
+
+                            return data;
+                        }
+                    },
+                ],
+            });
+        });
+    </script>
 
 @endsection

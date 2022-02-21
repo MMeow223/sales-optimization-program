@@ -27,9 +27,7 @@ class PharmaciesController extends Controller
      */
     public function index()
     {
-        return view('pharmacies.index')
-            ->with('pharmacies', Pharmacies::orderBy('pharmacy_name', 'asc')
-                ->paginate(15));
+        return view('pharmacies.index');
     }
 
     /**

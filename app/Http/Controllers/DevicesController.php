@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Devices;
-use App\Models\ExchangeRecords;
-use App\Models\Patients;
-use App\Models\Pharmacies;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class DevicesController extends Controller
 {
@@ -19,27 +23,23 @@ class DevicesController extends Controller
      */
     public function __construct()
     {
-        // Guest can use the 'create' & 'store' function in this controller
         $this->middleware('auth');
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
-        return view('devices.index')
-            ->with('devices', Devices::orderBy('device_brand', 'asc')
-                ->orderBy('device_model', 'asc')
-                ->paginate(15));
+        return view('devices.index');
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -49,8 +49,9 @@ class DevicesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Application|RedirectResponse|Redirector|void
+     * @throws ValidationException
      */
     public function store(Request $request)
     {
@@ -59,16 +60,14 @@ class DevicesController extends Controller
             'device_model' => 'required',
         ]);
 
-
-        // create new exchange record and patient
-        $device = new Devices();
-
-        // assign values to patient
-        $device->device_brand = $request->input('device_brand');
-        $device->device_model = $request->input('device_model');
-        $device->is_active = true;
-        $device->total_exchanged = 0;
-        $device->save();
+        $device  = Devices::query()->create(
+            [
+                'device_brand' => $request->input('device_brand'),
+                'device_model' => $request->input('device_model'),
+                'is_active' => true,
+                'total_exchanged' => 0,
+            ]
+        );
 
         if (Auth::user()) { // If user is logged in, redirect to exchanges list page
             return redirect('/devices/'.$device->id)->with('success', 'Device Added Successfully!');
@@ -78,85 +77,75 @@ class DevicesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @return Application|Factory|View
      */
     public function show($id)
     {
-
-        $device = Devices::find($id);
-
         return view('devices.show')
-            ->with('device', $device)
+            ->with('device', Devices::find($id))
             ;
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @return Application|Factory|View
      */
     public function edit($id)
     {
-
-        $device = Devices::find($id);
-
         return view('devices.edit')
-            ->with('device', $device)
+            ->with('device', Devices::find($id))
             ;
-        ;
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param int $id
+     * @return Application|Redirector|RedirectResponse
+     * @throws ValidationException
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $this->validate($request, [
             'device_brand' => 'required',
             'device_model' => 'required',
-
         ]);
 
-        // get the data from table first
-        $devices = Devices::find($id);
-
-        $devices->device_brand = $request->input('device_brand');
-        $devices->device_model = $request->input('device_model');
-        $devices->save();
+        DB::table('devices')
+            ->where('id',$id)
+            ->update([
+                'device_brand' => $request->input('device_brand'),
+                'device_model' => $request->input('device_model'),
+            ]);
 
         return redirect('/devices/'.$id)->with('success', 'Device Details Edited Successfully!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deactivate the is_active field of the specified resource in storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function destroy($id)
-    {
-        $device = Devices::find($id);
-        $device->delete();
-        dd($device);
-
-        return redirect('/devices')->with('success', 'Device Deleted Successfully!');
-    }
-
     public function deactivate($id)
     {
-        $device = Devices::find($id);
-        $device->is_active = 0;
-        $device->save();
+        DB::table('devices')
+            ->where('id',$id)
+            ->update(['is_active' => 0]);
 
         return redirect('/devices')->with('success', 'Device Deactivate Successfully!');
 
     }
+
+    /**
+     * Activate the is_active field of the specified resource in storage.
+     *
+     * @param $id
+     * @return Application|RedirectResponse|Redirector
+     */
     public function activate($id)
     {
         $device = Devices::find($id);
@@ -164,6 +153,5 @@ class DevicesController extends Controller
         $device->save();
 
         return redirect('/devices')->with('success', 'Device Activate Successfully!');
-
     }
 }

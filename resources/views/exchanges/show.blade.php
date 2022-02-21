@@ -130,7 +130,7 @@
                         <p>Patient's Phone Number</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $patient->patient_phone }}</p>
+                        <p>: <a href="tel:{{ $patient->patient_phone }}">{{ $patient->patient_phone }}</a></p>
                     </div>
                 </div>
             </div>
@@ -140,7 +140,7 @@
                         <p>Patient's Email</p>
                     </div>
                     <div class="col-md-8">
-                        <p>: {{ $patient->patient_email }}</p>
+                        <a href="mailto:{{ $patient->patient_email }}">{{ $patient->patient_email }}</a></p>
                     </div>
                 </div>
             </div>

@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Pharmacies extends Model
 {
     use HasFactory;
+
+    public function exchange(){
+
+        return $this->belongsTo(ExchangeRecords::class,);
+    }
 }

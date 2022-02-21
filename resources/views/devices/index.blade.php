@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <table class="table table-hover table-light">
+    <table id="device-table" class="table table-striped" style="width:100%">
         <thead>
             <tr>
                 <th>#</th>
@@ -22,27 +22,49 @@
             </tr>
         </thead>
         <tbody>
-        @if (count($devices) > 0)
-            @foreach ($devices as $device)
-                <tr>
-                    <td><a href="{{url("/devices/$device->id")}}">{{$device->id}}</a></td>
-                    <td>{{ $device->device_brand }}</td>
-                    <td>{{ $device->device_model }}</td>
-                    <td>{{ $device->created_at}}</td>
-{{--                    <td>{{ $device->updated_at}}</td>--}}
-                    <td class="{{ ($device->is_active) ? 'text-success' : 'text-danger'}}">{{ ($device->is_active) ? 'Active' : 'Inactive'}}</td>
-                </tr>
-            @endforeach
+
             </tbody>
         </table>
-            <!-- Pagination will appear when there's more than 4 items -->
-            <div class="d-flex justify-content-center">
-                {!! $devices->links() !!}
-            </div>
-        @else
-            <tr>
-                <td colspan="5">No records found</td>
-            </tr>
-        @endif
 
+    <script>
+        $(document).ready(function () {
+            $('#device-table').DataTable({
+                ajax: "{{route('api.devices.index')}}",
+                processing: true,
+                serverSide: true,
+                columns: [
+                    {
+                        data: 'id',
+                        render: function (data, type, row, meta) {
+                            return '<a href="/devices/' + data + '">' + data + '</a>';
+                        }
+                    },
+                    {data: 'device_brand'},
+                    {data: 'device_model'},
+                    {data: 'created_at',
+                        render: function (data, type, row, meta) {
+
+                            data = data.split('.')[0]
+                            data = data.split('T')[0] + " | " + data.split('T')[1]
+
+                            return data;
+                        }
+                    },
+                    {data: 'is_active',
+                        render: function (data, type, row, meta) {
+
+                        let color = "text-success";
+                        let text = "Active";
+                        if(!data){
+                            color = "text-danger";
+                            text = "Inactive"
+                        }
+                            return '<span class="'+color+'">'+text+'</span>';
+                        }
+                    },
+                ],
+
+            });
+        });
+    </script>
 @endsection

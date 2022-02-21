@@ -5,7 +5,7 @@
 
     <div class="row mb-2">
         <div class="col-md-8">
-            <h3>Edit Devices Details</h3>
+            <h3>Edit Pharmacy Details</h3>
         </div>
 
         <div class="d-flex justify-content-end">

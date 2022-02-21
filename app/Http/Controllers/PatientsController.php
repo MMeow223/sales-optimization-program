@@ -21,9 +21,7 @@ class PatientsController extends Controller
 
     public function index()
     {
-        return view('patients.index')
-            ->with('patients', Patients::orderBy('created_at', 'desc')
-                ->paginate(15));
+        return view('patients.index');
     }
 
     public function create()

@@ -32,6 +32,8 @@ Route::get('/devices/{device}/activate', [DevicesController::class, 'activate'])
 Route::get('/pharmacies/{pharmacy}/deactivate', [PharmaciesController::class, 'deactivate'])->name('pharmacies.deactivate');
 Route::get('/pharmacies/{pharmacy}/activate', [PharmaciesController::class, 'activate'])->name('pharmacies.activate');
 
+Route::get('/update-device-model-option/{devicebrand}',[ExchangesController::class,'updateDeviceModelOption']);
+
 Auth::routes();
 
 

@@ -7,53 +7,64 @@
         </div>
     </div>
 
-    <table class="table table-hover table-light">
+    <table id="patient-table" class="table table-striped" style="width:100%">
         <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Date of Birth</th>
-                <th>Email</th>
-{{--                <th>Address 1</th>--}}
-{{--                <th>Address 2</th>--}}
-{{--                <th>City</th>--}}
-{{--                <th>State</th>--}}
-                <th>Postcode</th>
-                <th>Phone</th>
-                <th>Diabetes Type</th>
-                <th>Created At</th>
-{{--                <th>Updated At</th>--}}
-            </tr>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Date of Birth</th>
+            <th>Email</th>
+            <th>Postcode</th>
+            <th>Phone</th>
+            <th>Diabetes Type</th>
+            <th>Created At</th>
+        </tr>
         </thead>
         <tbody>
-        @if (count($patients) > 0)
-            @foreach ($patients as $patient)
-                <tr>
-                    <td><a href="{{url("/patients/$patient->id")}}">{{$patient->id}}</a></td>
-                    <td>{{ $patient->patient_name}}</td>
-                    <td>{{ $patient->patient_dob }}</td>
-                    <td><a href="mailto:{{ $patient->patient_email}}">{{ $patient->patient_email}}</a></td>
-{{--                    <td>{{ $patient->patient_address_1 }}</td>--}}
-{{--                    <td>{{ $patient->patient_address_2}}</td>--}}
-{{--                    <td>{{ $patient->patient_city}}</td>--}}
-{{--                    <td>{{ $patient->patient_state}}</td>--}}
-                    <td>{{ $patient->patient_postcode}}</td>
-                    <td><a href="tel:{{$patient->patient_phone}}">{{ $patient->patient_phone}}</a></td>
-                    <td>{{ $patient->patient_diabetes_type}}</td>
-                    <td>{{ $patient->created_at}}</td>
-{{--                    <td>{{ $patient->updated_at}}</td>--}}
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-            <!-- Pagination will appear when there's more than 4 items -->
-            <div class="d-flex justify-content-center">
-                {!! $patients->links() !!}
-            </div>
-        @else
-            <tr>
-                <td colspan="5">No records found</td>
-            </tr>
-        @endif
+
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function () {
+            $('#patient-table').DataTable({
+                ajax: "{{route('api.patients.index')}}",
+                processing: true,
+                serverSide: true,
+                columns: [
+                    {
+                        data: 'id',
+                        render: function (data, type, row, meta) {
+                            return '<a href="/patients/' + data + '">' + data + '</a>';
+                        }
+                    },
+                    {data: 'patient_name'},
+                    {data: 'patient_dob'},
+                    {
+                        data: 'patient_email',
+                        render: function (data, type, row, meta) {
+                            return '<a href="mailto:' + data + '">' + data + '</a>';
+                        }
+                    },
+                    {data: 'patient_postcode'},
+                    {
+                        data: 'patient_phone',
+                        render: function (data, type, row, meta) {
+                            return '<a href="tel:' + data + '">' + data + '</a>';
+                        }
+                    },
+                    {data: 'patient_diabetes_type'},
+                    {data: 'created_at',
+                        render: function (data, type, row, meta) {
+
+                            data = data.split('.')[0]
+                            data = data.split('T')[0] + " | " + data.split('T')[1]
+
+                            return data;
+                        }
+                    },
+                ],
+            });
+        });
+    </script>
 
 @endsection
